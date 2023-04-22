@@ -4,10 +4,33 @@ import asyncio
 import os
 from typing import List
 
-from amiga_package import ops
-
+import grpc
 # import internal libs
+    #Defines message formats for communicating over the canbus network
+from farm_ng.canbus import canbus_pb2
+    #Client for communication over canbus
+from farm_ng.canbus.canbus_client import CanbusClient
+    #
+from farm_ng.canbus.packet import AmigaControlState
+    #Information about the amiga's current position and speed 
+from farm_ng.canbus.packet import AmigaTpdo1
+    #Send speed information 
+from farm_ng.canbus.packet import make_amiga_rpdo1_proto
+    #Recieve speed information
+from farm_ng.canbus.packet import parse_amiga_tpdo1_proto
+    #Defines formats for canbus messages of camera
+from farm_ng.oak import oak_pb2
+    #Cleint for communication with camera 
+from farm_ng.oak.camera_client import OakCameraClient
+    #Message formats and client for communication between farmng services
+from farm_ng.service import service_pb2
+from farm_ng.service.service_client import ClientConfig
 
+from turbojpeg import TurboJPEG
+
+    #Function that provides the tic changes on the default app
+    
+from ImageScanner import ops
 # Must come before kivy imports
 os.environ["KIVY_NO_ARGS"] = "1"
 
@@ -23,10 +46,12 @@ Config.set("kivy", "keyboard_mode", "systemanddock")
 
 # kivy imports
 from kivy.app import App  # noqa: E402
+from kivy.graphics.texture import Texture  # noqa: E402
 from kivy.lang.builder import Builder  # noqa: E402
+from kivy.properties import StringProperty  # noqa: E402
 
 
-class TemplateApp(App):
+class ImageScannerApp(App):
     """Base class for the main Kivy app."""
 
     def __init__(self) -> None:
@@ -72,7 +97,7 @@ class TemplateApp(App):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(prog="template-app")
+    parser = argparse.ArgumentParser(prog="Image-Scanner")
 
     # Add additional command line arguments here
 
@@ -80,7 +105,7 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
     try:
-        loop.run_until_complete(TemplateApp().app_func())
+        loop.run_until_complete(ImageScannerApp().app_func())
     except asyncio.CancelledError:
         pass
     loop.close()

@@ -10,7 +10,81 @@ RelativeLayout:
             source: "assets/back_button_normal.png" if self.parent.state == "normal" else "assets/back_button_down.png"
             pos: self.parent.pos
             size: self.parent.size
-    Label:
-        id: counter_label
-        text: "Tic: 0"
-        font_size: 40
+    GridLayout:
+        cols: 2
+        BoxLayout:
+            size_hint_x: 0.5
+            orientation: 'vertical'
+            Widget:
+                size_hint_y: 2.0
+            BoxLayout:
+                orientation: 'horizontal'
+                Label:
+                    text: "Amiga State:"
+                    font_size: 18
+                    size_hint_y: 0.5
+                Label:
+                    #text: app.amiga_state
+                    font_size: 18
+                Button:
+                    text: "Go"
+                    font_size: 18
+                    size_hint_y: 0.5
+                    background_normal: ''
+                    background_color: (0.341, 0.859, 0.192)
+                Widget: # Empty placeholder
+            BoxLayout:
+                orientation: 'horizontal' 
+                Label:
+                    text: "Speed [m/s]:"
+                    font_size: 18
+                    size_hint_y: 0.5
+                Label:
+                    #text: app.amiga_speed
+                    font_size: 18
+                Widget: # Empty placeholder
+            Slider:
+                orientation: 'horizontal'
+                min: 0
+                max: 50
+                step : 5
+            Widget:
+                size_hint_y: 2.0
+            BoxLayout:
+                orientation: 'horizontal' 
+                Label:
+                    text: "Pictures Per 10 feet: "
+                    font_size: 18
+                    size_hint_y: 0.5
+                Widget: # Empty placeholder
+            Slider:
+                orientation: 'horizontal'
+                min: 1
+                max: 10
+                step : 1
+            Widget:
+                size_hint_y: 2.0
+            Label:
+                id: counter_label
+                text: "Counter: 0"
+        TabbedPanel:
+            size_hint_x: 0.5
+            do_default_tab: False
+            TabbedPanelItem:
+                text: "Rgb"
+                Image:
+                    id: rgb
+            TabbedPanelItem:
+                text: "Disparity"
+                Image:
+                    id: disparity
+            TabbedPanelItem:
+                text: "Left"
+                Image:
+                    id: left
+            TabbedPanelItem:
+                text: "Right"
+                Image:
+                    id: right
+
+ 

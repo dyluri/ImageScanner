@@ -1,9 +1,5 @@
 # amiga-app-template
-
-This repository is designed to streamline the creation of a new application deployable to the Amiga brain.
-
-For the most up-to-date documentation on using this template repository, please refer to:
-
-[amiga.farm-ng.com - **Developing Custom Applications**](https://amiga.farm-ng.com/docs/brain/brain-apps)
+This repository is a app for the Robot Amiga developed by Farm-NG.
+The purpose of this app is to provide automated image capturing and saving from multiple angles while traveling automatically.
 
 ---
