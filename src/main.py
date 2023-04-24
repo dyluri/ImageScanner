@@ -2,6 +2,8 @@
 import argparse
 import asyncio
 import os
+#Time module for waiting for images
+import time
 from typing import List
 
 import grpc
