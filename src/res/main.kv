@@ -64,11 +64,12 @@ RelativeLayout:
                     size_hint_x : .10
                 Slider:
                     id: speed_slider
-                    orientation: 'horizontal'
                     min: 0
                     max: 50
-                    step : 5
-                    on_value: root.update_label(*args)
+                    step: 5
+                    size_hint_x: .75
+                    center_x: .9
+                    on_value: app.update_speed()
                 Widget
                     size_hint_x : .10
             Widget:
@@ -76,8 +77,13 @@ RelativeLayout:
             BoxLayout:
                 orientation: 'horizontal' 
                 Label:
-                    text: "Pictures Per 10 feet: "
+                    text: "Image Delay: "
                     font_size: 18
+                    size_hint_y: 0.5
+                Label:
+                    id: delay_label
+                    text: ''
+                    font_size: 16
                     size_hint_y: 0.5
                 Widget: # Empty placeholder
             BoxLayout
@@ -85,13 +91,14 @@ RelativeLayout:
                 Widget
                     size_hint_x : .10
                 Slider:
-                    id: picture_slider
+                    id: delay_slider
                     orientation: 'horizontal'
                     min: 1
-                    max: 10
+                    max: 5
                     step : 1
                     size_hint_x: .75
                     center_x: 0.9
+                    on_value: app.update_delay()
                 Widget:
                     size_hint_x : .10
             Widget:

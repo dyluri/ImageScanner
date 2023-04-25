@@ -77,12 +77,26 @@ class ImageScannerApp(App):
     def on_exit_btn(self) -> None:
         """Kills the running kivy application."""
         App.get_running_app().stop()
-    """Current Status, added 3 camera inputs and touched up the ui. There is a good chance that the sliders will either have to be removed or not be a async function"""        
-    """This function just does not want to work at all, consider redoing kivy layout because this is not working"""
-    def update_label(self):
+
+    def update_speed(self):
+        """This function updates the self.userSpeed based on the slider input"""
         if self.root is not None:
-            value = self.root.ids.speed_slider.value
-            self.root.ids.counter_label.text = f"{value}"
+            self.userSpeed = self.root.ids.speed_slider.value
+            self.root.ids.speed_label.text = f"{self.userSpeed}"
+ 
+    def update_delay(self):
+        """This function updates the self.pDelay (picture delay) based off the slider input"""
+        if self.root is not None:
+            self.pDelay = self.root.ids._slider.value
+            self.root.ids.delay_label.text = f"{self.pDelay}"
+    async def toggle_button(self):
+        """This function will run when the toggle button is pressed
+        If the amiga is in ACTIVE for autonomous mode, this function 
+        will call take pictures and the movement function (names not final)
+        Else, the take pictures function will be the only one called
+        """
+        pass
+        
     async def app_func(self):
         async def run_wrapper() -> None:
             # we don't actually need to set asyncio as the lib because it is
@@ -129,7 +143,8 @@ class ImageScannerApp(App):
                 if response_stream is not None:
                     response_stream.cancel()
                     response_stream = None 
-                print(f"{view_name} is not streaming or ready to stream")
+    #Remember to uncomment this
+                # print(f"{view_name} is not streaming or ready to stream")
                 await asyncio.sleep(0.1)
                 continue
             
