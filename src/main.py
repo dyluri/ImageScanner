@@ -87,7 +87,7 @@ class ImageScannerApp(App):
     def update_delay(self):
         """This function updates the self.pDelay (picture delay) based off the slider input"""
         if self.root is not None:
-            self.pDelay = self.root.ids._slider.value
+            self.pDelay = self.root.ids.delay_slider.value
             self.root.ids.delay_label.text = f"{self.pDelay}"
     async def toggle_button(self):
         """This function will run when the toggle button is pressed
