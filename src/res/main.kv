@@ -19,17 +19,27 @@ RelativeLayout:
                 size_hint_y: 2.0
             BoxLayout:
                 orientation: 'horizontal'
+                Widget:
+                    size_hint_x: .2
                 Label:
                     text: "Amiga State:"
-                    font_size: 18
-                    size_hint_y: 0.5
+                    font_size: 24
+                    size_hint_y: 1
+                    background_normal: ''
+                    background_color:	(.5, .5, .5, 1)
+                    canvas.before:
+                        Color:
+                            rgba: self.background_color
+                        Rectangle:
+                            size: self.size
+                            pos: self.pos
                 Label:
                     #text: app.amiga_state
                     font_size: 18
                 ToggleButton:
                     text: "Go"
-                    font_size: 18
-                    size_hint_y: 0.5
+                    font_size: 32
+                    size_hint_y: 1
                     background_normal: ''
                     background_color: (0.341, 0.859, 0.192)
                 Widget: # Empty placeholder
@@ -40,28 +50,57 @@ RelativeLayout:
                     font_size: 18
                     size_hint_y: 0.5
                 Label:
+                    text: ''
+                    font_size: 16
+                    size_hint_y: 0.5
+                    id : speed_label
+                Label:
                     #text: app.amiga_speed
                     font_size: 18
                 Widget: # Empty placeholder
-            Slider:
+            BoxLayout
                 orientation: 'horizontal'
-                min: 0
-                max: 50
-                step : 5
+                Widget
+                    size_hint_x : .10
+                Slider:
+                    id: speed_slider
+                    min: 0
+                    max: 50
+                    step: 5
+                    size_hint_x: .75
+                    center_x: .9
+                    on_value: app.update_speed()
+                Widget
+                    size_hint_x : .10
             Widget:
                 size_hint_y: 2.0
             BoxLayout:
                 orientation: 'horizontal' 
                 Label:
-                    text: "Pictures Per 10 feet: "
+                    text: "Image Delay: "
                     font_size: 18
                     size_hint_y: 0.5
+                Label:
+                    id: delay_label
+                    text: ''
+                    font_size: 16
+                    size_hint_y: 0.5
                 Widget: # Empty placeholder
-            Slider:
+            BoxLayout
                 orientation: 'horizontal'
-                min: 1
-                max: 10
-                step : 1
+                Widget
+                    size_hint_x : .10
+                Slider:
+                    id: delay_slider
+                    orientation: 'horizontal'
+                    min: 1
+                    max: 5
+                    step : 1
+                    size_hint_x: .75
+                    center_x: 0.9
+                    on_value: app.update_delay()
+                Widget:
+                    size_hint_x : .10
             Widget:
                 size_hint_y: 2.0
             Label:
@@ -71,20 +110,16 @@ RelativeLayout:
             size_hint_x: 0.5
             do_default_tab: False
             TabbedPanelItem:
-                text: "Rgb"
+                text: "Camera 1"
                 Image:
-                    id: rgb
+                    id: camera_1
             TabbedPanelItem:
-                text: "Disparity"
+                text: "Camera 2"
                 Image:
-                    id: disparity
+                    id: camera_2
             TabbedPanelItem:
-                text: "Left"
+                text: "Camera 3"
                 Image:
-                    id: left
-            TabbedPanelItem:
-                text: "Right"
-                Image:
-                    id: right
+                    id: camera_3
 
  
