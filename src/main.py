@@ -55,10 +55,15 @@ from kivy.properties import StringProperty  # noqa: E402
 
 class ImageScannerApp(App):
     """Base class for the main Kivy app."""
-    def __init__(self, address: str, port: int, stream_every_n: int) -> None:
+    def __init__(
+        self, address: str, port1: int, port2 : int, port3 : int, stream_every_n: int
+        ) -> None:
         super().__init__()
         self.address = address
-        self.port = port
+        #Camera ports
+        self.port1 = port1
+        self.port2 = port2
+        self.port3 = port3
         self.stream_every_n = stream_every_n
         self.image_decoder = TurboJPEG()
 
@@ -72,7 +77,12 @@ class ImageScannerApp(App):
     def on_exit_btn(self) -> None:
         """Kills the running kivy application."""
         App.get_running_app().stop()
-
+    """Current Status, added 3 camera inputs and touched up the ui. There is a good chance that the sliders will either have to be removed or not be a async function"""        
+    """This function just does not want to work at all, consider redoing kivy layout because this is not working"""
+    def update_label(self):
+        if self.root is not None:
+            value = self.root.ids.speed_slider.value
+            self.root.ids.counter_label.text = f"{value}"
     async def app_func(self):
         async def run_wrapper() -> None:
             # we don't actually need to set asyncio as the lib because it is
@@ -81,18 +91,30 @@ class ImageScannerApp(App):
             for task in self.tasks:
                 task.cancel()
                 
-            #Configuring the camera client
-            
-        config = ClientConfig(address = self.address, port = self.port)
-        client = OakCameraClient(config)
+           
+            #Configuring the camera client for the first camera 
+        config1 = ClientConfig(address = self.address, port = self.port1)
+        client1 = OakCameraClient(config1)
+            #Configuring the camera client for cam 2
+        config2 = ClientConfig(address = self.address, port = self.port2)
+        client2 = OakCameraClient(config2)
+            #Configuring the camera client for cam 3
+        config3 = ClientConfig(address = self.address, port = self.port3)
+        client3 = OakCameraClient(config3)
 
-            #stream the camera's frames
-        self.tasks.append(asyncio.ensure_future(self.stream_camera(client)))
+            #stream the cameras' frames
+        self.tasks.append(asyncio.ensure_future(self.stream_all(client1, client2, client3)))
+
         # Placeholder task
 
         return await asyncio.gather(run_wrapper(), *self.tasks)
-    async def stream_camera(self, client: OakCameraClient):
-        """This task listens to one camera stream and puts all 4 streams together for the kv file"""
+    async def stream_all(self, client1: OakCameraClient, client2: OakCameraClient, client3: OakCameraClient):
+        self.tasks.append(asyncio.ensure_future(self.stream_camera(client1, 'camera_1')))
+        self.tasks.append(asyncio.ensure_future(self.stream_camera(client2, 'camera_2')))
+        self.tasks.append(asyncio.ensure_future(self.stream_camera(client3, 'camera_3')))
+
+    async def stream_camera(self, client: OakCameraClient, view_name: str):
+        """This task listens to one camera stream and puts just the rgb stream into the proper spot for the kv file"""
         while self.root is None:
             await asyncio.sleep(0.01)
         response_stream = None
@@ -107,7 +129,7 @@ class ImageScannerApp(App):
                 if response_stream is not None:
                     response_stream.cancel()
                     response_stream = None 
-                print("Camera 1 is not streaming or ready to stream")
+                print(f"{view_name} is not streaming or ready to stream")
                 await asyncio.sleep(0.1)
                 continue
             
@@ -131,28 +153,27 @@ class ImageScannerApp(App):
             frame: oak_pb2.OakSyncFrame = response.frame
             
             #Get image and show
-            for view_name in ['rgb', 'disparity', 'left', 'right']:
-                try: 
-                    #decode image
-                    img = self.image_decoder.decode(
-                        getattr(frame,view_name).image_data
-                    )
-                    texture = Texture.create(
-                        #Creates the texture the height and width of img
-                        size = (img.shape[1], img.shape[2]), icolorfmt = 'bgr'
-                    )
-                    texture.flip_verticle()
-                    #Puts the image onto the texture variable, stored in blue green red format. 
-                    texture.blit_buffer(
-                        img.tobytes(),
-                        colorfmt = 'bgr', 
-                        bufferfmt = 'ubyte',
-                        mipmap_generation = False
-                    )
-                    #Puts the texture in the proper tab for the GUI
-                    self.root.ids[view_name].texture = texture
-                except Exception as e:
-                    print("Error", e)
+            try: 
+                #decode image
+                img = self.image_decoder.decode(
+                    getattr(frame,view_name).image_data
+                )
+                texture = Texture.create(
+                    #Creates the texture the height and width of img
+                    size = (img.shape[1], img.shape[2]), icolorfmt = 'bgr'
+                )
+                texture.flip_verticle()
+                #Puts the image onto the texture variable, stored in blue green red format. 
+                texture.blit_buffer(
+                    img.tobytes(),
+                    colorfmt = 'bgr', 
+                    bufferfmt = 'ubyte',
+                    mipmap_generation = False
+                )
+                #Puts the texture in the proper tab for the GUI (camera_1, camera_2, etc)
+                self.root.ids[view_name].texture = texture
+            except Exception as e:
+                print("Error", e)
                     
             await asyncio.sleep(1.0)
 
@@ -161,6 +182,11 @@ class ImageScannerApp(App):
             self.root.ids.counter_label.text = (
                 f"{'Tic' if self.counter % 2 == 0 else 'Tac'}: {self.counter}"
             )
+    
+    
+    async def picture_loop(self, client1 : OakCameraClient, client2: OakCameraClient, client3: OakCameraClient):
+        
+        pass
 
 
 if __name__ == "__main__":
@@ -168,6 +194,9 @@ if __name__ == "__main__":
 
     # Add additional command line arguments here
     parser.add_argument('--port', type= int, required= True, help = 'The Camera Port')
+        # Add additional command line arguments here
+    parser.add_argument('--port2', type= int, required= True, help = 'The Camera Port 2')
+    parser.add_argument('--port3', type= int, required= True, help = 'The Camera Port 3')
     parser.add_argument('--address', type= str, default = 'localhost', help = "The camera address")
     parser.add_argument('--stream-every-n', type=int, default = 2, help= 'Cam stream frequency')
     
@@ -177,7 +206,7 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
-            ImageScannerApp(args.address, args.port, args.stream_every_n).app_func()
+            ImageScannerApp(args.address, args.port, args.port2, args.port3, args.stream_every_n).app_func()
             )
     except asyncio.CancelledError:
         pass
