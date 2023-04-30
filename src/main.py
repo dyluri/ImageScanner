@@ -4,6 +4,8 @@ import asyncio
 import os
 #Time module for waiting for images
 import time
+import datetime
+import cv2
 from typing import List
 
 import grpc
@@ -66,8 +68,15 @@ class ImageScannerApp(App):
         self.port3 = port3
         self.stream_every_n = stream_every_n
         self.image_decoder = TurboJPEG()
-
+        
+        
+        self.take_pictures = False
+        self.last_capture_time = 0
         self.counter: int = 0
+        
+        #Set up where the images will be saved. 
+        self.data_dir = os.path.join(os.path.expanduser("~"), "my_data")
+        os.makedirs(self.data_dir, exist_ok=True)
 
         self.tasks: List[asyncio.Task] = []
 
@@ -89,13 +98,21 @@ class ImageScannerApp(App):
         if self.root is not None:
             self.pDelay = self.root.ids.delay_slider.value
             self.root.ids.delay_label.text = f"{self.pDelay}"
-    async def toggle_button(self):
+    def toggle_capture(self):
+        """Will flip the boolean value of self.take_pictures"""
+        if self.root is not None:
+            if(self.root.ids.toggle_picture_button.state == 'down'):
+                self.take_pictures = True
+            else:
+                self.take_pictures = False
+            #print(self.take_pictures)
+    # async def toggle_button(self):
         """This function will run when the toggle button is pressed
         If the amiga is in ACTIVE for autonomous mode, this function 
         will call take pictures and the movement function (names not final)
         Else, the take pictures function will be the only one called
         """
-        pass
+        # pass
         
     async def app_func(self):
         async def run_wrapper() -> None:
@@ -134,6 +151,9 @@ class ImageScannerApp(App):
         response_stream = None
         
         while True:
+            #IMPORTANT: move this after finishing function 
+            if(self.take_pictures):
+                self.tasks.append(asyncio.ensure_future(self.picture_loop(client)))
             state = await client.get_state()
             if state.value not in [
                 service_pb2.ServiceState.IDLE,
@@ -189,7 +209,10 @@ class ImageScannerApp(App):
                 self.root.ids[view_name].texture = texture
             except Exception as e:
                 print("Error", e)
-                    
+            
+            # #If the button is pressed down, take pictures.
+            if(self.take_pictures):
+                self.tasks.append(asyncio.ensure_future(self.picture_loop(client, img)))
             await asyncio.sleep(1.0)
 
             # increment the counter using internal libs and update the gui
@@ -198,9 +221,34 @@ class ImageScannerApp(App):
                 f"{'Tic' if self.counter % 2 == 0 else 'Tac'}: {self.counter}"
             )
     
-    
-    async def picture_loop(self, client1 : OakCameraClient, client2: OakCameraClient, client3: OakCameraClient):
-        
+    async def picture_loop(self, client : OakCameraClient, img):
+        print("would be taking pictures right now")
+        # get the current time using time.monotonic()
+        self.current_time = time.monotonic()
+
+        # check if enough time has passed since the last capture
+        if self.take_pictures and self.current_time - self.last_capture_time >= self.pDelay:
+            # convert image from bgr to rgb
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+            # save image to disk
+            data_dir = os.path.join(os.path.expanduser("~"), "my_data")
+            os.makedirs(data_dir, exist_ok=True)
+            
+            # get the current date and time
+            current_file_time = datetime.datetime.now()
+            # format the date and time as a string
+            time_str = current_file_time.strftime("%Y-%m-%d_%H-%M-%S")
+            # create the filename using the formatted date and time
+            filename = f"{time_str}.jpg"
+            # create the full path to the file
+            filepath = os.path.join(self.data_dir, filename)
+            # save the image to disk
+            cv2.imwrite(filepath, img)
+
+            # update the last capture time
+            self.last_capture_time = self.current_time
+
         pass
 
 
