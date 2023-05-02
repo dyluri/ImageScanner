@@ -58,7 +58,8 @@ from kivy.properties import StringProperty  # noqa: E402
 class ImageScannerApp(App):
     """Base class for the main Kivy app."""
     def __init__(
-        self, address: str, port1: int, port2 : int, 
+        self, address: str, port1: int,
+        # port2 : int, 
         #TESTING 2 CAMS
         # port3 : int,
         stream_every_n: int
@@ -69,7 +70,7 @@ class ImageScannerApp(App):
         print("app initialized")
         #Camera ports
         self.port1 = port1
-        self.port2 = port2
+        # self.port2 = port2
         #TESTING 2 CAMS
         # self.port3 = port3
         self.stream_every_n = stream_every_n
@@ -129,8 +130,8 @@ class ImageScannerApp(App):
         #DEBUG
         print("got past config of camera 1")
             #Configuring the camera client for cam 2
-        config2 = ClientConfig(address = self.address, port = self.port2)
-        client2 = OakCameraClient(config2)
+        # config2 = ClientConfig(address = self.address, port = self.port2)
+        # client2 = OakCameraClient(config2)
         #DEBUG
         print("got past config of camera 2")
             #Configuring the camera client for cam 3
@@ -139,7 +140,8 @@ class ImageScannerApp(App):
         # client3 = OakCameraClient(config3)
 
             #stream the cameras' frames
-        self.tasks.append(asyncio.ensure_future(self.stream_all(client1, client2
+        self.tasks.append(asyncio.ensure_future(self.stream_all(client1
+                                                                # , client2
                                                                 #TESTING 2 CAMS
                                                                 # ,client3
                                                                 )))
@@ -147,14 +149,15 @@ class ImageScannerApp(App):
 
 
         return await asyncio.gather(run_wrapper(), *self.tasks)
-    async def stream_all(self, client1: OakCameraClient, client2: OakCameraClient
+    async def stream_all(self, client1: OakCameraClient
+                        #  , client2: OakCameraClient
                         #  , client3: OakCameraClient
                         ):
         #DEBUG
         print("Got into stream all function")
         self.tasks = [
-        asyncio.ensure_future(self.stream_camera(client1, 'camera_1')),
-        asyncio.ensure_future(self.stream_camera(client2, 'camera_2'))
+        asyncio.ensure_future(self.stream_camera(client1, 'camera_1'))
+        # ,asyncio.ensure_future(self.stream_camera(client2, 'camera_2'))
         #TESTING 2 CAMS
         # ,asyncio.ensure_future(self.stream_camera(client3, 'camera_3'))
         ]
@@ -275,7 +278,7 @@ if __name__ == "__main__":
     # Add additional command line arguments here
     parser.add_argument('--port', type= int, required= True, help = 'The Camera Port')
         # Add additional command line arguments here
-    parser.add_argument('--port2', type= int, required= True, help = 'The Camera Port 2')
+    # parser.add_argument('--port2', type= int, required= True, help = 'The Camera Port 2')
     #TESTING 2 CAMS
     # parser.add_argument('--port3', type= int, required= True, help = 'The Camera Port 3')
     parser.add_argument('--address', type= str, default = 'localhost', help = "The camera address")
@@ -287,7 +290,8 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
-            ImageScannerApp(args.address, args.port, args.port2,
+            ImageScannerApp(args.address, args.port, 
+                            # args.port2,
                             #TESTING 2 CAMS
                             # args.port3,
                             args.stream_every_n).app_func()
