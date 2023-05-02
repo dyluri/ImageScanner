@@ -58,14 +58,18 @@ from kivy.properties import StringProperty  # noqa: E402
 class ImageScannerApp(App):
     """Base class for the main Kivy app."""
     def __init__(
-        self, address: str, port1: int, port2 : int, port3 : int, stream_every_n: int
+        self, address: str, port1: int, port2 : int, 
+        #TESTING 2 CAMS
+        # port3 : int,
+        stream_every_n: int
         ) -> None:
         super().__init__()
         self.address = address
         #Camera ports
         self.port1 = port1
         self.port2 = port2
-        self.port3 = port3
+        #TESTING 2 CAMS
+        # self.port3 = port3
         self.stream_every_n = stream_every_n
         self.image_decoder = TurboJPEG()
         
@@ -105,14 +109,7 @@ class ImageScannerApp(App):
                 self.take_pictures = True
             else:
                 self.take_pictures = False
-            #print(self.take_pictures)
-    # async def toggle_button(self):
-        """This function will run when the toggle button is pressed
-        If the amiga is in ACTIVE for autonomous mode, this function 
-        will call take pictures and the movement function (names not final)
-        Else, the take pictures function will be the only one called
-        """
-        # pass
+
         
     async def app_func(self):
         async def run_wrapper() -> None:
@@ -130,19 +127,29 @@ class ImageScannerApp(App):
         config2 = ClientConfig(address = self.address, port = self.port2)
         client2 = OakCameraClient(config2)
             #Configuring the camera client for cam 3
-        config3 = ClientConfig(address = self.address, port = self.port3)
-        client3 = OakCameraClient(config3)
+        #TESTING 2 CAMS
+        # config3 = ClientConfig(address = self.address, port = self.port3)
+        # client3 = OakCameraClient(config3)
 
             #stream the cameras' frames
-        self.tasks.append(asyncio.ensure_future(self.stream_all(client1, client2, client3)))
+        self.tasks.append(asyncio.ensure_future(self.stream_all(client1, client2
+                                                                #TESTING 2 CAMS
+                                                                # ,client3
+                                                                )))
 
-        # Placeholder task
+
 
         return await asyncio.gather(run_wrapper(), *self.tasks)
-    async def stream_all(self, client1: OakCameraClient, client2: OakCameraClient, client3: OakCameraClient):
-        self.tasks.append(asyncio.ensure_future(self.stream_camera(client1, 'camera_1')))
-        self.tasks.append(asyncio.ensure_future(self.stream_camera(client2, 'camera_2')))
-        self.tasks.append(asyncio.ensure_future(self.stream_camera(client3, 'camera_3')))
+    async def stream_all(self, client1: OakCameraClient, client2: OakCameraClient
+                        #  , client3: OakCameraClient
+                        ):
+        self.tasks = [
+        asyncio.ensure_future(self.stream_camera(client1, 'camera_1')),
+        asyncio.ensure_future(self.stream_camera(client2, 'camera_2'))
+        #TESTING 2 CAMS
+        # ,asyncio.ensure_future(self.stream_camera(client3, 'camera_3'))
+        ]
+        await asyncio.gather(*self.tasks)
 
     async def stream_camera(self, client: OakCameraClient, view_name: str):
         """This task listens to one camera stream and puts just the rgb stream into the proper spot for the kv file"""
@@ -152,8 +159,8 @@ class ImageScannerApp(App):
         
         while True:
             #IMPORTANT: move this after finishing function 
-            if(self.take_pictures):
-                self.tasks.append(asyncio.ensure_future(self.picture_loop(client)))
+            # if(self.take_pictures):
+                # self.tasks.append(asyncio.ensure_future(self.picture_loop(client)))
             state = await client.get_state()
             if state.value not in [
                 service_pb2.ServiceState.IDLE,
@@ -163,8 +170,8 @@ class ImageScannerApp(App):
                 if response_stream is not None:
                     response_stream.cancel()
                     response_stream = None 
-    #Remember to uncomment this
-                # print(f"{view_name} is not streaming or ready to stream")
+    # Remember to uncomment this
+                print(f"{view_name} is not streaming or ready to stream")
                 await asyncio.sleep(0.1)
                 continue
             
@@ -222,6 +229,7 @@ class ImageScannerApp(App):
             )
     
     async def picture_loop(self, client : OakCameraClient, img):
+        """This function will be taking a picture if the current time is longer than the delay"""
         print("would be taking pictures right now")
         # get the current time using time.monotonic()
         self.current_time = time.monotonic()
@@ -259,7 +267,8 @@ if __name__ == "__main__":
     parser.add_argument('--port', type= int, required= True, help = 'The Camera Port')
         # Add additional command line arguments here
     parser.add_argument('--port2', type= int, required= True, help = 'The Camera Port 2')
-    parser.add_argument('--port3', type= int, required= True, help = 'The Camera Port 3')
+    #TESTING 2 CAMS
+    # parser.add_argument('--port3', type= int, required= True, help = 'The Camera Port 3')
     parser.add_argument('--address', type= str, default = 'localhost', help = "The camera address")
     parser.add_argument('--stream-every-n', type=int, default = 2, help= 'Cam stream frequency')
     
@@ -269,7 +278,10 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(
-            ImageScannerApp(args.address, args.port, args.port2, args.port3, args.stream_every_n).app_func()
+            ImageScannerApp(args.address, args.port, args.port2,
+                            #TESTING 2 CAMS
+                            # args.port3,
+                            args.stream_every_n).app_func()
             )
     except asyncio.CancelledError:
         pass
