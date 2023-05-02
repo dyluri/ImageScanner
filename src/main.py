@@ -65,6 +65,8 @@ class ImageScannerApp(App):
         ) -> None:
         super().__init__()
         self.address = address
+        #DEBUG
+        print("app initialized")
         #Camera ports
         self.port1 = port1
         self.port2 = port2
@@ -119,13 +121,18 @@ class ImageScannerApp(App):
             for task in self.tasks:
                 task.cancel()
                 
-           
+        #DEBUG
+        print("got past wrapper")
             #Configuring the camera client for the first camera 
         config1 = ClientConfig(address = self.address, port = self.port1)
         client1 = OakCameraClient(config1)
+        #DEBUG
+        print("got past config of camera 1")
             #Configuring the camera client for cam 2
         config2 = ClientConfig(address = self.address, port = self.port2)
         client2 = OakCameraClient(config2)
+        #DEBUG
+        print("got past config of camera 2")
             #Configuring the camera client for cam 3
         #TESTING 2 CAMS
         # config3 = ClientConfig(address = self.address, port = self.port3)
@@ -143,6 +150,8 @@ class ImageScannerApp(App):
     async def stream_all(self, client1: OakCameraClient, client2: OakCameraClient
                         #  , client3: OakCameraClient
                         ):
+        #DEBUG
+        print("Got into stream all function")
         self.tasks = [
         asyncio.ensure_future(self.stream_camera(client1, 'camera_1')),
         asyncio.ensure_future(self.stream_camera(client2, 'camera_2'))
@@ -184,7 +193,7 @@ class ImageScannerApp(App):
                 assert response and response != grpc.aio.EOF, "End of Stream" 
                 
             except Exception as e:
-                print("Error: ", e)
+                print("the error: ", e)
                 response_stream.cancel()
                 response_stream = None
                 #loop starts over 
@@ -215,7 +224,7 @@ class ImageScannerApp(App):
                 #Puts the texture in the proper tab for the GUI (camera_1, camera_2, etc)
                 self.root.ids[view_name].texture = texture
             except Exception as e:
-                print("Error", e)
+                print("Error on texture generation", e)
             
             # #If the button is pressed down, take pictures.
             if(self.take_pictures):
@@ -283,6 +292,6 @@ if __name__ == "__main__":
                             # args.port3,
                             args.stream_every_n).app_func()
             )
-    except asyncio.CancelledError:
+    except asyncio.Cancelled:
         pass
     loop.close()
