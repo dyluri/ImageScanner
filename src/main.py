@@ -224,7 +224,7 @@ class ImageScannerApp(App):
                 except Exception as e:
                     print("Error on texture creation", e)
                 try: 
-                    texture.flip_verticle()
+                    texture.flip_vertical()
                 except Exception as e:
                     print("Flip failed", e)
                 #Puts the image onto the texture variable, stored in blue green red format. 
