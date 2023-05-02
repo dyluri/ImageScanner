@@ -211,7 +211,7 @@ class ImageScannerApp(App):
                 #decode image
                 print('Started try block for textures')
                 img = self.image_decoder.decode(
-                    getattr(frame,view_name).image_data
+                    getattr(frame,'rgb').image_data
                 )
                 print('Got image decoded')
                 texture = Texture.create(
@@ -227,7 +227,7 @@ class ImageScannerApp(App):
                     img.tobytes(),
                     colorfmt = 'bgr', 
                     bufferfmt = 'ubyte',
-                    mipmap_generation = False
+                    mipmap_generation = False,
                 )
                 print('billet buffer created')
                 #Puts the texture in the proper tab for the GUI (camera_1, camera_2, etc)
