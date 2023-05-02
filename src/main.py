@@ -209,23 +209,30 @@ class ImageScannerApp(App):
             #Get image and show
             try: 
                 #decode image
+                print('Started try block for textures')
                 img = self.image_decoder.decode(
                     getattr(frame,view_name).image_data
                 )
+                print('Got image decoded')
                 texture = Texture.create(
                     #Creates the texture the height and width of img
                     size = (img.shape[1], img.shape[2]), icolorfmt = 'bgr'
                 )
+                print('Texture created')
                 texture.flip_verticle()
+                print("Texture flipped vertically")
                 #Puts the image onto the texture variable, stored in blue green red format. 
+                
                 texture.blit_buffer(
                     img.tobytes(),
                     colorfmt = 'bgr', 
                     bufferfmt = 'ubyte',
                     mipmap_generation = False
                 )
+                print('billet buffer created')
                 #Puts the texture in the proper tab for the GUI (camera_1, camera_2, etc)
                 self.root.ids[view_name].texture = texture
+                print('root id established')
             except Exception as e:
                 print("Error on texture generation", e)
             
